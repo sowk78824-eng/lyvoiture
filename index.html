@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertisseur & Calculateur de Temps</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --secondary: #34495e;
+            --accent: #e67e22;
+            --bg: #f5f6fa;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        h2 { text-align: center; color: var(--secondary); margin-top: 0; }
+        .section {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: #666; }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #f1f1f1;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        input:focus { border-color: var(--primary); outline: none; }
+        
+        .result-area {
+            background: var(--secondary);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .res-val { font-size: 1.8rem; font-weight: bold; display: block; color: var(--primary); }
+        .res-time { font-size: 1.2rem; margin-top: 10px; color: #bdc3c7; }
+        .car-icon { font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Road Trip Planner 🚗</h2>
+
+    <div class="section">
+        <div class="section-title">1. Distance</div>
+        <input type="number" id="distInput" placeholder="Entrez la distance..." oninput="updateAll()">
+        <select id="unitMode" onchange="updateAll()">
+            <option value="kmToMi">Kilomètres → Miles</option>
+            <option value="miToKm">Miles → Kilomètres</option>
+        </select>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. Vitesse Moyenne</div>
+        <label id="speedLabel">Vitesse en km/h :</label>
+        <input type="number" id="speedInput" value="80" oninput="updateAll()">
+        <div style="display: flex; gap: 5px;">
+            <button onclick="setSpeed(50)" style="flex:1; cursor:pointer;">Ville (50)</button>
+            <button onclick="setSpeed(80)" style="flex:1; cursor:pointer;">Route (80)</button>
+            <button onclick="setSpeed(130)" style="flex:1; cursor:pointer;">Autoroute (130)</button>
+        </div>
+    </div>
+
+    <div class="result-area">
+        <span id="distResLabel">Distance convertie :</span>
+        <span class="res-val" id="convertedDist">0.00 mi</span>
+        
+        <div class="res-time">
+            <span class="car-icon">⏱️</span> Temps de trajet estimé :<br>
+            <strong id="timeRes" style="color: var(--accent);">0 min</strong>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateAll() {
+        const dist = parseFloat(document.getElementById('distInput').value);
+        const mode = document.getElementById('unitMode').value;
+        const speed = parseFloat(document.getElementById('speedInput').value);
+        
+        const convertedDisplay = document.getElementById('convertedDist');
+        const timeDisplay = document.getElementById('timeRes');
+        const speedLabel = document.getElementById('speedLabel');
+
+        // Mise à jour du label de vitesse selon le mode
+        speedLabel.innerText = mode === "kmToMi" ? "Vitesse en km/h :" : "Vitesse en mph :";
+
+        if (isNaN(dist) || dist <= 0) {
+            convertedDisplay.innerText = "---";
+            timeDisplay.innerText = "---";
+            return;
+        }
+
+        let distConv, unitConv, distForTime;
+
+        // 1. Calcul de la conversion
+        if (mode === "kmToMi") {
+            distConv = dist * 0.621371;
+            unitConv = "mi";
+            distForTime = dist; // La vitesse est en km/h, on garde la distance source en km
+        } else {
+            distConv = dist * 1.60934;
+            unitConv = "km";
+            distForTime = dist; // La vitesse est en mph, on garde la distance source en miles
+        }
+
+        convertedDisplay.innerText = `${distConv.toFixed(2)} ${unitConv}`;
+
+        // 2. Calcul du temps (Formule : Temps = Distance / Vitesse)
+        if (!isNaN(speed) && speed > 0) {
+            const decimalTime = distForTime / speed;
+            const hours = Math.floor(decimalTime);
+            const minutes = Math.round((decimalTime - hours) * 60);
+
+            let timeStr = "";
+            if (hours > 0) timeStr += `${hours}h `;
+            timeStr += `${minutes}min`;
+            timeDisplay.innerText = timeStr;
+        } else {
+            timeDisplay.innerText = "Vitesse requise";
+        }
+    }
+
+    function setSpeed(v) {
+        document.getElementById('speedInput').value = v;
+        updateAll();
+    }
+</script>
+
+</body>
+</html>
